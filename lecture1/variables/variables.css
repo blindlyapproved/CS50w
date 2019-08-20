@@ -1,13 +1,13 @@
-$color: yellow;
-
 ul {
   font-size: 14px;
   font-family: arial;
-  color: $color;
+  color: yellow;
 }
 
 ol {
   font-size: 18px;
   font-family: arial;
-  color: $color;
+  color: yellow;
 }
+
+/*# sourceMappingURL=variables.css.map */
