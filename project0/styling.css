@@ -5,7 +5,7 @@ h1 {
   text-align: left;
   padding-bottom: 15px;
   background-color: rgb(163, 224, 219);
-  transform: skewX(10deg) skewY(-2deg);
+  transform: skewX(1deg) skewY(1deg);
 }
 
 
@@ -26,4 +26,48 @@ nav {
   padding: 100px;
   margin-left: 50px;
   width: 750px;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.container > div {
+  background-color: rgb(163, 224, 219);
+  font-size: 20px;
+  font-family: arial;
+  margin: 20px;
+  padding: 20px;
+  width: 200px;
+}
+
+.dbox {
+  height: 200px;
+  width: 200px;
+  position: relative;
+  background: red;
+  text-transform: uppercase;
+  animation: office 30s 4;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+h3 {
+  color: black;
+  font: italic 5em sans-serif;
+  letter-spacing: -10px;
+  font-weight: 900;
+  margin: 0 20px;
+  padding-top: 30px;
+
+}
+
+
+@keyframes office {
+   0%   {background-color:red; left:0px; top:0px;}
+   25%  {background-color:orange; left:500px; top:0px;}
+   50%  {background-color:yellow; right:500px; top:500px;}
+   75%  {background-color:green; left:0px; top:500px;}
+   100% {background-color:blue; left:50px; top:0px;}
 }
