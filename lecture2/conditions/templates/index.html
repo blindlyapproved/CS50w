@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Is it Sashie's birthday?</title>
+    <style media="screen">
+      body {
+        text-align: center;
+        text: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Is it Sashie's Birthday yet?</h1>
+    {% if sashie_birthday %}
+      <h1>Yes, Happy Birthday Sashie!</h1>
+
+    {% else %}
+    <h1>No not yet :-(</h1>
+    {% endif %}
+  </body>
+</html>
