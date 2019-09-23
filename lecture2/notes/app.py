@@ -7,7 +7,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-notes = ["hello this is the first example note"]
+notes = []
 
 @app.route("/", methods=["GET", "POST"])
 def index():
