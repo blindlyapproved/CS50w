@@ -23,14 +23,20 @@ db = scoped_session(sessionmaker(bind=engine))
 
 @app.route("/")
 def index():
-    return "Project 1: TODO"
+    return render_template("index.html")
 
-@app.route("/login", methods=['GET', 'POST'])
-def login:
-    error= None
+@app.route('/register', methods=['GET', 'POST'])
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
     if request.method == 'POST':
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
-            error = 'Invalid Username or Password. Please try again.'
+        if request.form['username'] != 'luuk' or request.form['password'] != 'luuk':
+            error = 'Wrong username or password.'
         else:
-            return redirect(url_for('home'))
-        return render_template('login.html', error=error)
+            return redirect(url_for('index'))
+    return render_template('login.html', error=error)
+
+# start the server with the 'run()' method
+if __name__ == '__main__':
+    app.run(debug=True)
