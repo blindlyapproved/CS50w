@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, session, render_template, redirect, url_for, request
+from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -26,6 +27,8 @@ def index():
     return render_template("index.html")
 
 @app.route('/register', methods=['GET', 'POST'])
+def register():
+    return render_template("register.html")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
