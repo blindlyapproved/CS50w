@@ -1,11 +1,14 @@
 import os
+import requests
+import json
+from helpers import *
+
 
 from flask import Flask, flash, request, session, redirect, render_template, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from passlib.hash import pbkdf2_sha256
 
 app = Flask(__name__)
 
@@ -23,76 +26,104 @@ engine = create_engine('postgres://spfjxchcicutmo:993c2a795902efebcbd301004fbfd4
 db = scoped_session(sessionmaker(bind=engine))
 
 # Standard route for the app aka home
-@app.route("/")
+@app.route("/",methods=["GET","POST"])
+@login_required
 def index():
-    return render_template("index.html")
+    username=session.get('username')
+    message=Markup("""<blockquote class="blockquote p-5 mt-5">
+    <p>"This is a quote"</p>
+    </blockquote>""")
+    session["books"]=[]
+    if request.method=="POST":
+        message=('')
+        text=request.form.get('text')
+        data=db.execute("SELECT * FROM books WHERE author iLIKE '%"+text+"' OR title iLIKE '%"+text+"' OR isbn iLIKE '%"+text+"%'").fetchall()
+        for x in data:
+            session['books'].append(x)
+        if len(session['books'])==0:
+            message=('Nothing found. Try again.')
+    return render_template("index.html", data=session['books'],message=message,username=usernme)
 
-# Route  to register an account, with double pw check
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == "GET":
-        if session.get("logged_in"):
-            flash("You are already logged in.")
-            return redirect(url_for('index'), "303")
-        else:
-            return render_template("register.html")
-        if request.method == "POST":
-            username = request.form.get("username")
-            pw1 = request.form.get('password')
-            pw2 = request.form.get('pw2')
-
-#            if pw1 != pw2 or pw1 is None or pw2 is None
-#            flash("The passwords do not match")
-#            return redirect(url_for('register'), "303")
-
-        hash = pbkdf2_sha256.hash(pass1)
-        db.execute("INSERT INTO users (username, password) VALUES (:name, :hash)",
-                    {"name": username, "hash": hash})
+@app.route("/isbn/<string:isbn>",methods=["GET","POST"])
+@login_required
+def bookpage(isbn):
+    warning=""
+    username=sessionget('username')
+    session["reviews"]=[]
+    secondreview=db.execute("SELECT * FROM reviews where isbn = :isbn AND username= :username",{"username":username,"isbn":isbn}).fetchone()
+    if request.method=="POST" and secondreview==None:
+        review=request.form.get('textarea')
+        rating=request.form.get('stars')
+        db.execute("INSERT INTO reviews (isbn, review, rating, username) VALUES (:a,:b,:c,:d)",{"a":isbn,"b":review,"c":rating,"d":username})
         db.commit()
-        flash("You successfully created your Boocklub account")
-        return redirdct(url_for('register'), "303")
+    if request.method=="POST" and secondreview!=None:
+        warning="You can only submit one review per book."
+
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "eQMPpVGHwnK4lJEym9l91Q", "isbns": isbn})
+    average_rating=res.json()['books'][0]['average_rating']
+    work_ratings_count=res.json()['books'][0]['work_ratings_count']
+    reviews=db.execute("SELECT * FROM reviews where isbn = :isbn",{"isbn":ibsn}).fetchall()
+    for y in reviews:
+        session['reviews'].append(y)
+    data=db.execute("SELECT * FROM books where isbn = :isbn",{"isbn:isbn"}).fetchone()
+    return render_template("book.html",data=data,reviews=session['reviews'],average_rating=average_rating,work_ratings_count=work_ratings_count,username=username,warning=warning)
+
+@app.route("/api<string:isbn")
+@login_required
+def api(isbn):
+    data=db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":isbn}).fetchone()
+    if data==None:
+        return render_template('404.html')
+    res. requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "eQMPpVGHwnK4lJEym9l91Q", "isbns": isbn})
+    average_rating=res.json()['books'][0]['average_rating']
+    work_ratings_count=res.json()['books'][0]['work_ratings_count']
+    x = {
+    "title": data.title,
+    "author": data.author,
+    "year": data.year,
+    "isb": isbn,
+    "review_count": work_ratings_count,
+    "average_score": average_rating
+    }
+    api=json.dumps(x)
+    return render_template("api.json",api=api)
 
 
 # Route to login to an account
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == "GET":
-            if session.get("logged_in"):
-                flash("You are already logged in.")
-                return redirect(url_for('index'), "303")
-    else:
-        return render_template("login.html")
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+    log_in_message=""
+    if request.method=="POST":
+        email=request.form.get('email')
+        userPassword=request.form.get('userPassword')
+        emailLogIn=request.form.get('emailLogIn')
+        userPasswordLogIn=reques.tform.get('userPasswordLogIn')
+        if emailLogIn==None:
+            data=db.execute("SELECT username FROM users").fetchall()
+            for i in range(len(data)):
+                if data[i]["username"]==email:
+                    log_in_message="Sorry, this username has already been taken."
+                    return render_template('login.html',log_in_message=log_in_message)
+            db.execute("INSERT INTO users (username, password) VALUES (:a, :b)",{"a":email,"b":userPassword})
+            db.commit()
+            log_in_message="You successfully created your account."
+        else:
+            data=db.execute("SELECT * FROM users WHERE username = :a",{"a":emailLogIn}).fetchone()
+            if data!=None:
+                if data.username==emailLogIn and data.password==userPasswordLogIn:
+                    session["username"]=emailLogIn
+                    return redirect(url_for("index"))
+                else:
+                    log_in_message="Wrong email or password. Try again please."
+            else:
+                log_in_message="Wrong email or password. Try again please."
+        return render_template('login.html',log_in_message=log_in_message)
 
-        res = db.execute("SELECT id, password FROM users WHERE username LIKE :name", {"name": username}).fetchone()
-        db_hash = res.password
-        user_id = res.id
-
-        if not res:
-            flash("This user does not exist.")
-            return redirect(url_for('login'), "303")
-
-    # db_hash = db_hash[0].encode("utf-8")
-    if pbkdf2_sha256.verify(password, db_hash):
-        session["logged_in"] = True
-        session["user_id"] = user_id
-        session["username"] = username
-        flash("You successfully logged in.")
-        return redirect(url_for('index'), "303")
-
-    else:
-        flash("Invalid credentials.")
-        return redirect(url_for('login'), "303")
 
 @app.route('/logout')
 def logout():
-    session["logged_in"] = False
-    session["user_id"] = None
-    flash("Logout successful.")
-    return redirect(url_for('index'))
-
+    session.clear()
+    return redirect(url_for("login"))
 
 # start the server with the 'run()' method
 if __name__ == '__main__':
