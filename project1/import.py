@@ -1,24 +1,29 @@
+import os
 import csv
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-engine = create_engine("mysql+pymysql://bartix997:zxszxs321@localhost:3306/project1")
-db = scoped_session(sessionmaker(bind=engine))
+if not os.getenv("DATABASE_URL")=="postgres://spfjxchcicutmo:993c2a795902efebcbd301004fbfd4e089c839dcf4113162aaec4b6f6fece33c@ec2-54-246-100-246.eu-west-1.compute.amazonaws.com:5432/dbh7invlfb8eg3":
+    raise RuntimeError("DATABASE_URL is not set")
 
+engine= create_engine(os.getenv("DATABASE_URL"))
+db =scoped_session(sessionmaker(bind=engine))
 
 def main():
-    file = open('books.txt', 'r')
-    f = csv.reader(file, 'excel-tab')
-    print("id, goodread_id, isbn, isbn13, authors, publication_year, title, rating, rating_count, url, small_url")
-    for b_id, g_id, isbn, isbn13, authors, year, title, rating, r_count, image_url, small_image_url in f:
-        db.execute(
-            "INSERT INTO `books` (`id`, `goodreads_book_id`, `isbn`, `isbn13`, `authors`, `original_publication_year`, `original_title`, `average_rating`, `ratings_count`, `image_url`, `small_image_url`) VALUES (NULL, :g_id, :isbn, :isbn13, :authors, :year, :title, :rating, :r_count, :image_url, :small_image_url)",
-            {"g_id": int(g_id), "isbn": isbn, "isbn13": isbn13, "authors": authors, "year": int(float(year)), "title": title,
-             "rating": float(rating), "r_count": int(r_count), "image_url": image_url, "small_image_url": small_image_url})
-        # print(int(b_id), int(g_id), isbn, isbn13, authors, int(float(year)), title, float(rating), int(r_count), image_url, small_image_url)
+    db.execute("CREATE TABLE users (id SERIAL PRIMARY KEY, username VARCHAR NOT NULL, password VARCHAR NOT NULL)")
+    db.execute("CREATE TABLE reviews (isbn VARCHAR NOT NULL,review VARCHAR NOT NULL, rating INTEGER NOT NULL,username VARCHAR NOT NULL)")
+    db.execute("CREATE TABLE books (isbn VARCHAR PRIMARY KEY,title VARCHAR NOT NULL,author VARCHAR NOT NULL,year VARCHAR NOT NULL)")
+    f=open("books.csv")
+    reader =csv.reader(f)
+    for isbn,title,author,year in reader:
+        if year == "year":
+            print('skipped first line')
+        else:
+            db.execute("INSERT INTO books (isbn, title, author, year) VALUES (:a,:b,:c,:d)",{"a":isbn,"b":title,"c":author,"d":year})
 
+    print("done")
     db.commit()
 
-
-if __name__ == '__main__':
-    main(
+if __name__ == "__main__":
+    main()

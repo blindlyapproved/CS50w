@@ -68,13 +68,13 @@ def bookpage(isbn):
     data=db.execute("SELECT * FROM books where isbn = :isbn",{"isbn:isbn"}).fetchone()
     return render_template("book.html",data=data,reviews=session['reviews'],average_rating=average_rating,work_ratings_count=work_ratings_count,username=username,warning=warning)
 
-@app.route("/api<string:isbn")
+@app.route("/api<string:isbn>")
 @login_required
 def api(isbn):
     data=db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":isbn}).fetchone()
     if data==None:
         return render_template('404.html')
-    res. requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "eQMPpVGHwnK4lJEym9l91Q", "isbns": isbn})
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "eQMPpVGHwnK4lJEym9l91Q", "isbns": isbn})
     average_rating=res.json()['books'][0]['average_rating']
     work_ratings_count=res.json()['books'][0]['work_ratings_count']
     x = {
@@ -117,7 +117,7 @@ def login():
                     log_in_message="Wrong email or password. Try again please."
             else:
                 log_in_message="Wrong email or password. Try again please."
-        return render_template('login.html',log_in_message=log_in_message)
+    return render_template('login.html',log_in_message=log_in_message)
 
 
 @app.route('/logout')
