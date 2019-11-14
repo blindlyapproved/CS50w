@@ -3,9 +3,7 @@ import requests
 import json
 from helpers import *
 
-
-from flask import Flask, flash, request, session, redirect, render_template, url_for, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, session,render_template,request,redirect,url_for,Markup
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -42,13 +40,13 @@ def index():
             session['books'].append(x)
         if len(session['books'])==0:
             message=('Nothing found. Try again.')
-    return render_template("index.html", data=session['books'],message=message,username=usernme)
+    return render_template("index.html", data=session['books'],message=message,username=username)
 
 @app.route("/isbn/<string:isbn>",methods=["GET","POST"])
 @login_required
 def bookpage(isbn):
     warning=""
-    username=sessionget('username')
+    username=session.get('username')
     session["reviews"]=[]
     secondreview=db.execute("SELECT * FROM reviews where isbn = :isbn AND username= :username",{"username":username,"isbn":isbn}).fetchone()
     if request.method=="POST" and secondreview==None:
@@ -62,7 +60,7 @@ def bookpage(isbn):
     res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "eQMPpVGHwnK4lJEym9l91Q", "isbns": isbn})
     average_rating=res.json()['books'][0]['average_rating']
     work_ratings_count=res.json()['books'][0]['work_ratings_count']
-    reviews=db.execute("SELECT * FROM reviews where isbn = :isbn",{"isbn":ibsn}).fetchall()
+    reviews=db.execute("SELECT * FROM reviews where isbn = :isbn",{"isbn":isbn}).fetchall()
     for y in reviews:
         session['reviews'].append(y)
     data=db.execute("SELECT * FROM books where isbn = :isbn",{"isbn:isbn"}).fetchone()
@@ -97,7 +95,7 @@ def login():
         email=request.form.get('email')
         userPassword=request.form.get('userPassword')
         emailLogIn=request.form.get('emailLogIn')
-        userPasswordLogIn=reques.tform.get('userPasswordLogIn')
+        userPasswordLogIn=request.form.get('userPasswordLogIn')
         if emailLogIn==None:
             data=db.execute("SELECT username FROM users").fetchall()
             for i in range(len(data)):
@@ -106,7 +104,7 @@ def login():
                     return render_template('login.html',log_in_message=log_in_message)
             db.execute("INSERT INTO users (username, password) VALUES (:a, :b)",{"a":email,"b":userPassword})
             db.commit()
-            log_in_message="You successfully created your account."
+            log_in_message="You have successfully created your account."
         else:
             data=db.execute("SELECT * FROM users WHERE username = :a",{"a":emailLogIn}).fetchone()
             if data!=None:
