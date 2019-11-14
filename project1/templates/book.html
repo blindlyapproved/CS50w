@@ -6,13 +6,13 @@
     <div class='col'>
         Author:<h2> {{data.author}}</h2>
         Year:<h2> {{data.year}}</h2>
-        Isbn:<h2> {{data.isbn}}</h2>
+        ISBN:<h2> {{data.isbn}}</h2>
     </div>
     <div class='col text-center bg-info my-2'>
-        <h2 class=''>Goodread.com rating: </h2>
+        <h2 class=''>Ratings from others: </h2>
         <h1>{{average_rating}}</h1>
-        <h5 class=''>Reviews received: </h5>
-        <h3>{{work_ratings_count}}</h3>
+        <h5 class=''>Reviewed by:</h5>
+        <h3>{{work_ratings_count}} people</h3>
     </div>
 </div>
 {% if reviews != None %}

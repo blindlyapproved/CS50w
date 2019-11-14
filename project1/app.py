@@ -39,7 +39,7 @@ def index():
         for x in data:
             session['books'].append(x)
         if len(session['books'])==0:
-            message=('Nothing found. Try again.')
+            message=("This book is not available yet in your Boocklub. Want to add it?")
     return render_template("index.html", data=session['books'],message=message,username=username)
 
 @app.route("/isbn/<string:isbn>",methods=["GET","POST"])
@@ -63,7 +63,7 @@ def bookpage(isbn):
     reviews=db.execute("SELECT * FROM reviews where isbn = :isbn",{"isbn":isbn}).fetchall()
     for y in reviews:
         session['reviews'].append(y)
-    data=db.execute("SELECT * FROM books where isbn = :isbn",{"isbn:isbn"}).fetchone()
+    data=db.execute("SELECT * FROM books where isbn = :isbn",{"isbn":isbn}).fetchone()
     return render_template("book.html",data=data,reviews=session['reviews'],average_rating=average_rating,work_ratings_count=work_ratings_count,username=username,warning=warning)
 
 @app.route("/api<string:isbn>")
@@ -88,10 +88,39 @@ def api(isbn):
 
 
 # Route to login to an account
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login",methods=["GET","POST"])
 def login():
     log_in_message=""
     if request.method=="POST":
+        email=request.form.get('email')
+        userPassword=request.form.get('userPassword')
+        emailLogIn=request.form.get('emailLogIn')
+        userPasswordLogIn=request.form.get('userPasswordLogIn')
+        if emailLogIn==None:                                  ## registration
+            data=db.execute("SELECT username FROM users").fetchall()
+            for i in range(len(data)):
+                if data[i]["username"]==email:
+                    log_in_message="Sorry. Username already exist"
+                    return render_template('login.html',log_in_message=log_in_message)
+            db.execute("INSERT INTO users (username,password) VALUES (:a,:b)",{"a":email,"b":userPassword})
+            db.commit()
+            log_in_message="Success! You can log in now."
+        else:                                                 ## registration
+            data=db.execute("SELECT * FROM users WHERE username = :a",{"a":emailLogIn}).fetchone()
+            if data!=None:
+                if data.username==emailLogIn and data.password==userPasswordLogIn:
+                    session["username"]=emailLogIn
+                    return redirect(url_for("index"))
+                else:
+                    log_in_message="Wrong email or password. Try again."
+            else:
+                log_in_message="Wrong email or password. Try again."
+    return render_template('login.html',log_in_message=log_in_message)
+
+# Route to register
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == "POST":
         email=request.form.get('email')
         userPassword=request.form.get('userPassword')
         emailLogIn=request.form.get('emailLogIn')
@@ -105,17 +134,7 @@ def login():
             db.execute("INSERT INTO users (username, password) VALUES (:a, :b)",{"a":email,"b":userPassword})
             db.commit()
             log_in_message="You have successfully created your account."
-        else:
-            data=db.execute("SELECT * FROM users WHERE username = :a",{"a":emailLogIn}).fetchone()
-            if data!=None:
-                if data.username==emailLogIn and data.password==userPasswordLogIn:
-                    session["username"]=emailLogIn
-                    return redirect(url_for("index"))
-                else:
-                    log_in_message="Wrong email or password. Try again please."
-            else:
-                log_in_message="Wrong email or password. Try again please."
-    return render_template('login.html',log_in_message=log_in_message)
+    return render_template("login.html")
 
 
 @app.route('/logout')

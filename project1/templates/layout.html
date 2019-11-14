@@ -14,7 +14,7 @@
         <div class='float-left'><a href="{{url_for('index')}}">Home</a></div>
         <div class='float-right'>{{username}}   <a href="{{url_for('logout')}}">   Log out</a></div>
     </div>
-<header class='container bg-light h-25 text-center '>
+<header class='container bg-light h-0 text-center '>
     <h1 class="display-2 py-4">Boocklub</h1>
 </header>
 <nav class='navbar navbar-expand bg-dark navbar-dark justify-content-center'>
@@ -29,6 +29,7 @@
 
     </div>
 </main>
+
 <script>
 function passwordMatch() {                                                                      //match password input and repeat password input
     var userPassword=$("#userPassword");                                                        //get both elements
