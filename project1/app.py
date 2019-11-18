@@ -25,7 +25,6 @@ db = scoped_session(sessionmaker(bind=engine))
 
 # Standard route for the app aka home
 @app.route("/",methods=["GET","POST"])
-@login_required
 def index():
     username=session.get('username')
     message=Markup("""<blockquote class="blockquote p-5 mt-5">
@@ -43,7 +42,6 @@ def index():
     return render_template("index.html", data=session['books'],message=message,username=username)
 
 @app.route("/isbn/<string:isbn>",methods=["GET","POST"])
-@login_required
 def bookpage(isbn):
     warning=""
     username=session.get('username')
@@ -66,7 +64,7 @@ def bookpage(isbn):
     data=db.execute("SELECT * FROM books where isbn = :isbn",{"isbn":isbn}).fetchone()
     return render_template("book.html",data=data,reviews=session['reviews'],average_rating=average_rating,work_ratings_count=work_ratings_count,username=username,warning=warning)
 
-@app.route("/api<string:isbn>")
+@app.route("/api/<string:isbn>")
 @login_required
 def api(isbn):
     data=db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":isbn}).fetchone()
@@ -86,56 +84,34 @@ def api(isbn):
     api=json.dumps(x)
     return render_template("api.json",api=api)
 
-
 # Route to login to an account
-@app.route("/login",methods=["GET","POST"])
+@app.route("/create", methods=["GET","POST"])
 def login():
-    log_in_message=""
-    if request.method=="POST":
-        email=request.form.get('email')
-        userPassword=request.form.get('userPassword')
-        emailLogIn=request.form.get('emailLogIn')
-        userPasswordLogIn=request.form.get('userPasswordLogIn')
-        if emailLogIn==None:                                  ## registration
-            data=db.execute("SELECT username FROM users").fetchall()
-            for i in range(len(data)):
-                if data[i]["username"]==email:
-                    log_in_message="Sorry. Username already exist"
-                    return render_template('login.html',log_in_message=log_in_message)
-            db.execute("INSERT INTO users (username,password) VALUES (:a,:b)",{"a":email,"b":userPassword})
-            db.commit()
-            log_in_message="Success! You can log in now."
-        else:                                                 ## registration
-            data=db.execute("SELECT * FROM users WHERE username = :a",{"a":emailLogIn}).fetchone()
-            if data!=None:
-                if data.username==emailLogIn and data.password==userPasswordLogIn:
-                    session["username"]=emailLogIn
-                    return redirect(url_for("index"))
-                else:
-                    log_in_message="Wrong email or password. Try again."
-            else:
-                log_in_message="Wrong email or password. Try again."
-    return render_template('login.html',log_in_message=log_in_message)
-
-# Route to register
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == "POST":
-        email=request.form.get('email')
-        userPassword=request.form.get('userPassword')
-        emailLogIn=request.form.get('emailLogIn')
-        userPasswordLogIn=request.form.get('userPasswordLogIn')
-        if emailLogIn==None:
-            data=db.execute("SELECT username FROM users").fetchall()
-            for i in range(len(data)):
-                if data[i]["username"]==email:
-                    log_in_message="Sorry, this username has already been taken."
-                    return render_template('login.html',log_in_message=log_in_message)
-            db.execute("INSERT INTO users (username, password) VALUES (:a, :b)",{"a":email,"b":userPassword})
-            db.commit()
-            log_in_message="You have successfully created your account."
+    # check for email
+    email = request.form.get("email")
+    if email:
+        #query = db.execute("SELECT * FROM users where email = :email", {"email": email}).fetchone()
+        query = "l.dejonge@live.nl"
+        if email == query:
+            # if username exists, check for password
+            password = request.form.get("password")
+            if password:
+                query = "Dolead"
+                #query = db.execute("SELECT * FROM users where password = :password", {"password": password}).fetchone()
+                if password == query:
+                    return redirect(url_for("success"))
+    # if password matches, login, redirect index
+    # else render login with error
     return render_template("login.html")
 
+
+@app.route("/success")
+def success():
+    return render_template("success.html")
+
+@app.route("/register", methods=["GET","POST"])
+def register():
+    return render_template("register.html")
 
 @app.route('/logout')
 def logout():
