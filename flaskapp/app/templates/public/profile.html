@@ -1,0 +1,29 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Your Profile{% endblock%}
+
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1>Your Profile</h1>
+      <hr>
+
+      <div class="card">
+        <div class="card-body">
+          <h4>{{ username }}</h4>
+          <hr>
+          {% if user %}
+          <p><strong>{{ user["name"] }}</strong></p>
+          <p class="text-muted">{{ user["bio"] }}</p>
+          <p><em>{{ user["twitter_handle"] }}</em></p>
+          {% else %}
+          <p>User not found. You can create one here.</p>
+          {% endif%}
+
+        </div>
+
+      </div>
+{% endblock %}
