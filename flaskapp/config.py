@@ -11,6 +11,10 @@ class Config(object):
 
     UPLOADS = "/home/username/app/app/static/images/uploads"
 
+    CLIENT_IMAGES = "/Users/luuk/cs50w/flaskapp/app/static/client/img"
+    CLIENT_CSV = "/Users/luuk/cs50w/flaskapp/app/static/client/csv"
+    CLIENT_REPORT = "/Users/luuk/cs50w/flaskapp/app/static/client/reports"
+
     SESSION_COOKIE_SECURE = True
 
 class ProductionConfig(Config):

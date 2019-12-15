@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect, jsonify, make_response
+from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -197,3 +197,37 @@ def upload_image():
             return redirect(request.url)
 
     return render_template("public/upload_image.html")
+
+
+@app.route("/get-image/<path:image_name>")
+def get_image(image_name):
+
+    try:
+        return send_from_directory(
+            app.config["CLIENT_IMAGES"], filename=image_name, as_attachment=False
+            )
+
+    except FileNotFoundError:
+        abort(404)
+
+@app.route("/get-csv/<path:filename>")
+def get_csv(filename):
+
+    try:
+        return send_from_directory(
+            app.config["CLIENT_CSV"], filename=filename, as_attachment=True
+            )
+
+    except FileNotFoundError:
+        abort(404)
+
+@app.route("/get-report/<path:path>")
+def get_report(path):
+
+    try:
+        return send_from_directory(
+            app.config["CLIENT_REPORTS"], filename=path, as_attachment=True
+            )
+
+    except FileNotFoundError:
+        abort(404)
