@@ -231,3 +231,37 @@ def get_report(path):
 
     except FileNotFoundError:
         abort(404)
+
+@app.route("/cookies")
+def cookies():
+
+    res = make_response("cookies", 200)
+
+    cookies = request.cookies
+
+    flavor = cookies.get("flavor")
+
+    choc_type = cookies.get("chocolate type")
+
+    chewy = cookies.get("chewy")
+
+    print(flavor)
+    print(choc_type)
+    print(chewy)
+
+    res.set_cookie(
+    "flavor",
+    value="chocolate chip",
+    max_age=10,
+    expires=None,
+    path=request.path,
+    domain=None,
+    secure=False,
+    httponly=False,
+    samesite=False,
+    )
+
+    res.set_cookie("chocolate type", "dark")
+    res.set_cookie("chewy", "yes")
+
+    return res
