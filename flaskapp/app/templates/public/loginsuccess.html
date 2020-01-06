@@ -1,0 +1,25 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}You're logged in{% endblock%}
+
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <h1>You've successfully logged in now</h1>
+      <hr>
+
+      <div class="card">
+        <div class="card-body">
+          <h4>{{ user["username"] }}</h4>
+          <hr>
+
+          <p>{{ user["email"] }}</p>
+          <p> class="test-muted">{{ user["bio"] }}</p>
+
+        </div>
+
+      </div>
+{% endblock %}

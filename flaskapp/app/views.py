@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort
+from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort, session, url_for
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -74,8 +74,8 @@ def jinja():
 def about():
     return render_template("public/about.html")
 
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
+@app.route("/register", methods=["GET", "POST"])
+def register():
     if request.method == "POST":
         req = request.form
         username = req["username"]
@@ -83,26 +83,8 @@ def signup():
         password = request.form["password"]
         print(username, email, password)
         return redirect(request.url)
-    return render_template("public/signup.html")
+    return render_template("public/register.html")
 
-
-users = {
-    "mitsuhiko": {
-        "name": "Armin Ronacher",
-        "bio": "Creatof of the Flask framework",
-        "twitter_handle": "@mitsuhiko"
-    },
-    "gvanrossum": {
-        "name": "Guido Van Rossum",
-        "bio": "Creator of the Python programming language",
-        "twitter_handle": "@gvanrossum"
-    },
-    "elonmusk": {
-        "name": "elon musk",
-        "bio": "technology entrepreneur, investor, and engineer",
-        "twitter_handle": "@elonmusk"
-    }
-}
 
 @app.route("/profile/<username>")
 def profile(username):
@@ -265,3 +247,68 @@ def cookies():
     res.set_cookie("chewy", "yes")
 
     return res
+
+app.config["SECRET_KEY"] = "LePcYlYr-nil4bCcNKOUYw"
+
+users = {
+    "luuk": {
+        "username": "Luuk de Jonge",
+        "email": "luuk@example.com",
+        "password": "example",
+        "bio": "random dude"
+    },
+    "sasha": {
+        "username": "sasha",
+        "email": "sasha@example.com",
+        "password": "example123",
+        "bio": "slut"
+    }
+}
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        req = request.form
+
+        username = req.get("username")
+        password = req.get("password")
+
+        if not username in users:
+            print("Username not found")
+            return redirect(request.url)
+        else:
+            user = users[username]
+
+        if not password == user["password"]:
+            print("Incorrect password")
+            return redirect(request.url)
+
+        else:
+            session["USERNAME"] = user["username"]
+            print(session)
+            print("session username set")
+            return redirect(url_for("loginsuccess"))
+
+    return render_template("public/login.html")
+
+
+@app.route("/loginsuccess")
+def loginsuccess():
+
+    if not session.get("USERNAME") is None:
+        username = session.get("USERNAME")
+        user = users[username]
+        return render_template("public/loginsuccess.html", user=user)
+    else:
+        print("No username found in session")
+        return redirect(url_for("login"))
+
+
+@app.route("/sign-out")
+def sign_out():
+
+    session.pop("USERNAME", None)
+
+    return redirect(url_for("sign_in"))
