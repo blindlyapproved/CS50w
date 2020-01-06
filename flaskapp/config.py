@@ -3,8 +3,6 @@ class Config(object):
     DEBUG = False
     TESTING = False
 
-    SECRET_KEY = "fs799jl97qw456gg87w"
-
     DB_NAME = "production-db"
     DB_USERNAME = "root"
     DB_PASSWORD = "example"

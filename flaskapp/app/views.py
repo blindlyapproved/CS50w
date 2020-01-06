@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort, session, url_for
+from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort, session, url_for, flash
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -76,13 +76,24 @@ def about():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+
     if request.method == "POST":
+
         req = request.form
-        username = req["username"]
+
+        username = req.get("username")
         email = req.get("email")
-        password = request.form["password"]
-        print(username, email, password)
+        password = req.get("password")
+
+        if not len(password) >= 10:
+            flash("Password must be at least 10 characters in length.")
+            print("i put something in flash")
+            return redirect(request.url)
+
+        flash("Account successfully created.")
+        print("account created")
         return redirect(request.url)
+
     return render_template("public/register.html")
 
 
@@ -214,45 +225,11 @@ def get_report(path):
     except FileNotFoundError:
         abort(404)
 
-@app.route("/cookies")
-def cookies():
-
-    res = make_response("cookies", 200)
-
-    cookies = request.cookies
-
-    flavor = cookies.get("flavor")
-
-    choc_type = cookies.get("chocolate type")
-
-    chewy = cookies.get("chewy")
-
-    print(flavor)
-    print(choc_type)
-    print(chewy)
-
-    res.set_cookie(
-    "flavor",
-    value="chocolate chip",
-    max_age=10,
-    expires=None,
-    path=request.path,
-    domain=None,
-    secure=False,
-    httponly=False,
-    samesite=False,
-    )
-
-    res.set_cookie("chocolate type", "dark")
-    res.set_cookie("chewy", "yes")
-
     return res
-
-app.config["SECRET_KEY"] = "LePcYlYr-nil4bCcNKOUYw"
 
 users = {
     "luuk": {
-        "username": "Luuk de Jonge",
+        "username": "luuk",
         "email": "luuk@example.com",
         "password": "example",
         "bio": "random dude"
@@ -261,13 +238,15 @@ users = {
         "username": "sasha",
         "email": "sasha@example.com",
         "password": "example123",
-        "bio": "slut"
+        "bio": ""
     }
 }
 
+app.config["SECRET_KEY"] = "OCML3BRawWEUeaxcuKHLpw"
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
+    session["whatever"] = 'something'
     if request.method == "POST":
 
         req = request.form
@@ -301,6 +280,7 @@ def loginsuccess():
         username = session.get("USERNAME")
         user = users[username]
         return render_template("public/loginsuccess.html", user=user)
+
     else:
         print("No username found in session")
         return redirect(url_for("login"))
