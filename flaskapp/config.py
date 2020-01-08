@@ -7,13 +7,15 @@ class Config(object):
     DB_USERNAME = "root"
     DB_PASSWORD = "example"
 
+    SECRET_KEY = "OCML3BRawWEUeaxcuKHLpw"
+
     UPLOADS = "/home/username/app/app/static/images/uploads"
 
     CLIENT_IMAGES = "/Users/luuk/cs50w/flaskapp/app/static/client/img"
     CLIENT_CSV = "/Users/luuk/cs50w/flaskapp/app/static/client/csv"
     CLIENT_REPORT = "/Users/luuk/cs50w/flaskapp/app/static/client/reports"
 
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False
 
 class ProductionConfig(Config):
     pass

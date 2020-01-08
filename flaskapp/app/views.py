@@ -85,12 +85,12 @@ def register():
         email = req.get("email")
         password = req.get("password")
 
-        if not len(password) >= 10:
-            flash("Password must be at least 10 characters in length.")
+        if not len(password) >= 6:
+            flash("Password must be at least 6 characters in length.", "danger")
             print("i put something in flash")
             return redirect(request.url)
 
-        flash("Account successfully created.")
+        flash("Account successfully created.", "success")
         print("account created")
         return redirect(request.url)
 
@@ -241,8 +241,6 @@ users = {
         "bio": ""
     }
 }
-
-app.config["SECRET_KEY"] = "OCML3BRawWEUeaxcuKHLpw"
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
