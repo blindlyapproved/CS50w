@@ -22,4 +22,3 @@ def server_error(e):
     app.logger.error(f"Server error: {e}, route: {request.url}")
     
     return render_template("public/403.html")
-

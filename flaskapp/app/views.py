@@ -291,3 +291,41 @@ def sign_out():
 
     return redirect(url_for("sign_in"))
 
+# mock database
+stock = {
+    "fruit": {
+        "apple": 30,
+        "banana": 45,
+        "cherry": 1000
+    }
+}
+
+# GET
+# POST
+# PUT
+# PATCH
+# DELETE
+
+@app.route("/get-text")
+def get_text():
+    return "some text"
+
+@app.route("/home")
+def home():
+    return render_template("public/index.html")
+
+@app.route("/qs")
+def qs():
+
+    if request.args:
+        res = request.args
+        return " ".join(f"{k}: {v} " for k, v in res.items())
+
+    return "No query"
+
+@app.route("/stock")
+def get_stock():
+    
+    res = make_response(jsonify(stock), 200)
+
+    return res

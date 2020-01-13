@@ -1,7 +1,6 @@
 from flask import Flask
 
 app = Flask(__name__)
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 if app.config["ENV"] == "production":
     app.config.from_object("config.ProductionConfig")
@@ -12,4 +11,4 @@ else:
 
 from app import views
 from app import admin_views
-from app import error_handler
+from app import error_handlers
