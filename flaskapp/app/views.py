@@ -1,6 +1,9 @@
 from app import app
 from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort, session, url_for, flash
 from werkzeug.utils import secure_filename
+import redis
+from rq import Queue
+import time
 import os
 from datetime import datetime
 
@@ -85,9 +88,19 @@ def register():
         email = req.get("email")
         password = req.get("password")
 
-        if not len(password) >= 6:
+        if not len(username) >= 6:
             flash("Password must be at least 6 characters in length.", "danger")
             print("i put something in flash")
+            return redirect(request.url)
+
+        if not len(password) >= 3:
+            flash("Username must be at least 3 characters in length.", "danger")
+            print("i put something in flash")
+            return redirect(request.url)
+
+        if "@" not in (email) :
+            flash("The email address you signed up with is not an actual email address.", "danger")
+            print("email was not email")
             return redirect(request.url)
 
         flash("Account successfully created.", "success")
@@ -225,7 +238,7 @@ def get_report(path):
     except FileNotFoundError:
         abort(404)
 
-    return res
+    return None
 
 users = {
     "luuk": {
@@ -329,3 +342,62 @@ def get_stock():
     res = make_response(jsonify(stock), 200)
 
     return res
+
+@app.route("/stock/<collection>")
+def get_collection(collection):
+
+    """ Returns the collection from the stock """
+
+    if collection in stock:
+        res = make_response(jsonify(stock[collection]), 200)
+        return res
+
+    res = res = make_response(jsonify({"error: item not found"}), 400)
+
+    return res
+
+@app.route("/stock/<collection>/<member>")
+def get_member(collection, member):
+
+    """ Returns the qty of the member """
+
+    if collection in stock:
+        member = stock[collection].get(member)
+        if member:
+            res = make_response(jsonify(member), 200)
+            return res
+
+        res = res = make_response(jsonify({"error: uknown member"}), 400)
+        return res
+
+    res = res = make_response(jsonify({"error": "Collection not found"}), 400)
+    return res
+
+r = redis.Redis()
+q = Queue(connection=r)
+
+def background_task(n):s
+
+    delay = 2
+
+    print("Task running")
+    print(f"Simulating {delay} second delay")
+
+    time.sleep(delay)
+    print(len(n))
+
+    print("Task complete")
+    return len(n)
+
+@app.route("/task")
+def add_task():
+
+    if request.args.get("n"):
+
+        job = q.enqueue(background_task, request.args.get("n"))
+
+        q_len = len(q)
+
+        return f"Task {job.id} added to queue at {job.enqueued_at}. {q_len} tasks in the queue"
+    return "No value for n"
+
