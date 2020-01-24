@@ -376,7 +376,7 @@ def get_member(collection, member):
 r = redis.Redis()
 q = Queue(connection=r)
 
-def background_task(n):s
+def background_task(n):
 
     delay = 2
 
