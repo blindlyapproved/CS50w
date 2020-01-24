@@ -9,4 +9,3 @@ q = Queue(connection=r)
 
 from app import views
 from app import tasks
-

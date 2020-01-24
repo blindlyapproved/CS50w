@@ -8,6 +8,8 @@ def count_words(url):
 
     print(f"Counting words at {url}")
 
+    time.sleep(2)
+
     start = time.time()
 
     r = request.urlopen(url)
